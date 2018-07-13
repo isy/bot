@@ -33,7 +33,7 @@ func main() {
 			Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)},
 		}
 
-		bot, err := linebot.New(os.Getenv("CHANNEL_ID"), os.Getenv("CHANNEL_SECRET"), linebot.WithHTTPClient(client))
+		bot, err := linebot.New(os.Getenv("CHANNEL_SECRET"), os.Getenv("CHANNEL_ACCESS_TOKEN"), linebot.WithHTTPClient(client))
 		if err != nil {
 			fmt.Println(err)
 			return
