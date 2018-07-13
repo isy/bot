@@ -2,27 +2,27 @@ package main
 
 import (
 	"log"
-	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 
-	"github.com/gin-gonic/gin"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/gin-gonic/gin"
+	_ "github.com/heroku/x/hmetrics/onload"
 )
 
 func main() {
 	port := os.Getenv("PORT")
+
 	if port == "" {
-		log.Fatal("PORT must be set")
+		log.Fatal("$PORT must be set")
 	}
 
 	router := gin.New()
 	router.Use(gin.Logger())
-	router.LoadHTMLGlob("template/*.tmpl.html")
+	router.LoadHTMLGlob("templates/*.tmpl.html")
 	router.Static("/static", "static")
 
-	router.Get("/", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl.html", nil)
 	})
 
@@ -57,7 +57,6 @@ func main() {
 			}
 		}
 	})
-
 
 	router.Run(":" + port)
 }
