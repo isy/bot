@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
-	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/gin-gonic/gin"
+	"github.com/line/line-bot-sdk-go/linebot"
 )
 
 func main() {
@@ -31,13 +33,13 @@ func main() {
 			Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)},
 		}
 
-		bot, err := linebot.NewClient(os.Getenv("CHANNEL_ID"), os.Getenv("CHANNEL_SECRET"), os.Getenv("MID") linebot.WithHTTPClient(client))
+		bot, err := linebot.New(os.Getenv("CHANNEL_ID"), os.Getenv("CHANNEL_SECRET"), linebot.WithHTTPClient(client))
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		received, err := bot.ParseRequest(c.Request)
+		events, err := bot.ParseRequest(c.Request)
 		if err != nil {
 			if err == linebot.ErrInvalidSignature {
 				fmt.Println(err)
@@ -45,15 +47,23 @@ func main() {
 			return
 		}
 
-		for _, result := range received.Results {
-			content := result.Context()
-			if content != nil && content.IsMessage && content.ContentType == linebot.ContentTypeText {
-				text, err := content.TextContent()
-				res, err := bot.SendText([]string{content.Form}, "OK "+text.Text)
-				if err != nil {
-					fmt.Println(res)
+		for _, event := range events {
+			if event.Type == linebot.EventTypeMessage {
+				switch message := event.Message.(type) {
+				case *linebot.TextMessage:
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
+						log.Print(err)
+					}
 				}
 			}
+			// content := event.Context()
+			// if content != nil && content.IsMessage && content.ContentType == linebot.ContentTypeText {
+			// 	text, err := content.TextContent()
+			// 	res, err := bot.SendText([]string{content.Form}, "OK "+text.Text)
+			// 	if err != nil {
+			// 		fmt.Println(res)
+			// 	}
+			// }
 		}
 	})
 
