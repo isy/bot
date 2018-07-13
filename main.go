@@ -7,7 +7,6 @@ import (
 
 	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/gin-gonic/gin"
-	_ "github.com/heroku/x/hmetrics/onload"
 )
 
 func main() {
